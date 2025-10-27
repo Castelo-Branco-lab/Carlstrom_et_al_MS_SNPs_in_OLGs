@@ -1,0 +1,184 @@
+---
+title: "MPRA1_Allelic_comparisons"
+author: "eneritz"
+date: "2025-06-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(MPRAnalyze)
+library(mpra)
+library(ggplot2)
+library(ggrepel)
+library(tidyverse)
+set.seed(1234)
+```
+
+outputs from MPRA1 plasmid1 2 rounds mpraflow count.nf --mpranalyze
+```{bash}
+ce.rnaCounts <- read.csv("OPC_Ctrl/rna_counts.tsv" , header = TRUE, 
+                         sep = "\t", row.names = 1 , 
+                         #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                         stringsAsFactors = FALSE , fill = T)
+
+ce.dnaCounts <- read.csv("OPC_Ctrl/dna_counts.tsv" , header = TRUE, 
+                         sep = "\t", row.names = 1 , 
+                         #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                         stringsAsFactors = FALSE , fill = T)
+
+#retrieve only rep2 (round2) and rep3 (round1)
+rnacounts_opcC <- ce.rnaCounts[,!grepl("_1_",colnames(ce.rnaCounts))]
+head(rnacounts_opcC)
+head(ce.rnaCounts)
+dim(rnacounts_opcC)
+dim(ce.rnaCounts)
+
+
+dnacounts_opcC <- ce.dnaCounts[,!grepl("_1_",colnames(ce.dnaCounts))]
+head(dnacounts_opcC)
+head(ce.dnaCounts)
+dim(rnacounts_opcC)
+dim(ce.rnaCounts)
+
+#ctrl
+#extract controls
+rnacounts_opcC_ctrl <- rnacounts_opcC[grepl("Control_",rownames(rnacounts_opcC)),]
+
+# extract the controls
+dnacounts_opcC_ctrl <- dnacounts_opcC[grepl("Control_",rownames(dnacounts_opcC)),]
+
+dim(dnacounts_opcC_ctrl)
+dim(rnacounts_opcC_ctrl)
+
+#annot
+
+ce.rnaAnnot <- read.table("OPC_Ctrl/rna_annot.tsv" , header = TRUE, 
+                          sep = "\t", row.names = 1 ,
+                          #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                          fill = T)
+
+ce.dnaAnnot <- read.table("OPC_Ctrl/dna_annot.tsv" , header = TRUE, 
+                          sep = "\t" , row.names = 1  , 
+                          #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                          fill = T)
+
+#select round2 and round1 counts
+dnaanot_opcC <- ce.dnaAnnot[!grepl("_1_",rownames(ce.dnaAnnot)),]
+rnaanot_opcC <- ce.rnaAnnot[!grepl("_1_",rownames(ce.rnaAnnot)),]
+
+#create annot
+rnaanot_opcC_A <-  rnaanot_opcC
+rnaanot_opcC_B <-  rnaanot_opcC
+rnaanot_opcC_A$allele <- "A"
+rnaanot_opcC_B$allele <- "B"
+rownames(rnaanot_opcC_A) <- gsub("Ctrl", "A", rownames(rnaanot_opcC_A))
+rownames(rnaanot_opcC_B) <- gsub("Ctrl", "B", rownames(rnaanot_opcC_B))
+rnaanot_opcC_alelles <- rbind(rnaanot_opcC_A , rnaanot_opcC_B)
+
+rnaanot_opcC_alelles$barcode_allelic <- interaction(rnaanot_opcC_alelles$barcode, rnaanot_opcC_alelles$allele)
+summary(rnaanot_opcC_alelles)
+
+
+
+dnaanot_opcC_A <-  dnaanot_opcC
+dnaanot_opcC_B <-  dnaanot_opcC
+dnaanot_opcC_A$allele <- "A"
+dnaanot_opcC_B$allele <- "B"
+rownames(dnaanot_opcC_A) <- gsub("Ctrl", "A", rownames(dnaanot_opcC_A))
+rownames(dnaanot_opcC_B) <- gsub("Ctrl", "B", rownames(dnaanot_opcC_B))
+dnaanot_opcC_alelles <- rbind(dnaanot_opcC_A , dnaanot_opcC_B)
+
+dnaanot_opcC_alelles$barcode_allelic <- interaction(dnaanot_opcC_alelles$barcode, dnaanot_opcC_alelles$allele)
+summary(dnaanot_opcC_alelles)
+
+rnaanot_opcC_alelles$replicate <- as.factor(rnaanot_opcC_alelles$replicate)
+rnaanot_opcC_alelles$barcode <- as.factor(rnaanot_opcC_alelles$barcode)
+rnaanot_opcC_alelles$allele <- as.factor(rnaanot_opcC_alelles$allele)
+
+
+dnaanot_opcC_alelles$replicate <- as.factor(dnaanot_opcC_alelles$replicate)
+dnaanot_opcC_alelles$barcode <- as.factor(dnaanot_opcC_alelles$barcode)
+dnaanot_opcC_alelles$allele <- as.factor(dnaanot_opcC_alelles$allele)
+
+
+```
+
+load the table with the CRS selection pairs
+rownames is the comparison 
+colnames barcode names for non-MS and MS alleles ( they have to have different barcode names)
+```{bash}
+#CRS pairs selection
+more CRS_FINAL221208_Allele_analysis_2025_AllelesAB_correctedIDs.csv
+#crs,pair,allele
+#776_FWD_CDC16_rs483180_C__LD_rs1886736_rs55899400_rs3838425_AACC,1,A
+#800_FWD_CDC16_rs483180_G__LD_rs1886736_rs55899400_rs3838425_AACC,1,B
+#777_FWD_CDC16_rs483180_C__LD_rs1886736_rs55899400_rs3838425_AAdelC,2,A
+#801_FWD_CDC16_rs483180_G__LD_rs1886736_rs55899400_rs3838425_AAdelC,2,B
+#778_FWD_CDC16_rs483180_C__LD_rs1886736_rs55899400_rs3838425_AAdelCC,3,A
+
+```
+from mpraflow counts out filtered to the CRS of interest (COMP = pair)
+```{r}
+ COMP_rna<-  readRDS("MPRA1_plas1_modelCompALL96_RNAcounts.rds")
+ COMP_dna <-  readRDS("MPRA1_plas1_modelCompALL96_DNAcounts.rds")
+ dnaanot_opcC_alelles <- readRDS("MPRA1_plas1_modelCompALL96_DNAAnnot.rds")
+ rnaanot_opcC_alelles <- readRDS("MPRA1_plas1_modelCompALL96_RNAAnnot.rds")
+```
+
+V0 version complete
+```{r}
+#takes long run it in bash
+#R --vanilla < create_tables_MPRAanalyze_alleles_SEPTCOMP.R
+
+obj_COMP <- MpraObject(dnaCounts = (COMP_dna), rnaCounts = (COMP_rna),  dnaAnnot = dnaanot_opcC_alelles, rnaAnnot = rnaanot_opcC_alelles )
+
+
+ obj_COMP <- estimateDepthFactors(obj_COMP, lib.factor = c( "replicate"  ),   which.lib = "both")
+
+obj_COMP <- analyzeComparative(obj_COMP, dnaDesign = ~ barcode + allele, rnaDesign = ~  allele, reducedDesign = ~ 1)
+
+
+```
+
+
+#####################################
+see stats 
+```{r}
+
+res_COMP_test_V0 <- testLrt(obj_COMP)
+summary(res_COMP_test_V0)
+## plot log Fold-Change
+plot(density(res_COMP_test_V0$logFC))
+plot(res_COMP_test_V0$logFC, -log10(res_COMP_test_V0$pval))
+res_COMP_test_V0
+
+p1 <- EnhancedVolcano(res_COMP_test_V0,
+    lab = (rownames(res_COMP_test_V0)),
+    x = 'logFC',
+    y = 'fdr',
+     max.overlaps = Inf ,
+    pCutoff =  0.05,
+     ylab = "(-log10 FDR)",
+    xlab = "logFC Ref vs. Alt allele",
+    FCcutoff = 0.2,
+    cutoffLineType = 'twodash',
+    cutoffLineWidth = 0.8,
+    pointSize = 2.0,
+    labSize = 3.0,
+    colAlpha = 1,
+    legendLabels=c('Not sig.','logFC > 0.2 ','qvalue',
+      'qvalue & logFC'),
+    legendPosition = 'right',
+    legendLabSize = 10,
+    legendIconSize = 3.0 , 
+    drawConnectors = TRUE ,
+    subtitle = '',  caption = '' ,
+    col = c('grey', 'beige', 'brown', 'orange') , title = "MPRA1 allelic comparisons") #,  
+  
+p1 
+```
+see stats V0
