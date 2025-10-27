@@ -1,0 +1,340 @@
+
+---
+title: "MPRA2"
+author: "eneritz"
+date: "2025-08-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(MPRAnalyze)
+library(mpra)
+library(ggplot2)
+library(ggrepel)
+library(tidyverse)
+```
+```{r}
+#input counts tables coming from mpranalyze count.nf 
+# MPRA2_CRS_BC_counts.sh
+```
+
+
+OPC ctrl MPRA2 
+```{r}
+ce.rnaCounts <- read.csv("OPC_Ctrl/rna_counts.tsv" , header = TRUE, 
+                  sep = "\t", row.names = 1 , 
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  stringsAsFactors = FALSE , fill = T)
+
+ce.dnaCounts <- read.csv("OPC_Ctrl/dna_counts.tsv" , header = TRUE, 
+                  sep = "\t", row.names = 1 , 
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  stringsAsFactors = FALSE , fill = T)
+
+#retrieve only rep1 and rep2
+rnacounts_opcC <- ce.rnaCounts[,!grepl("_3_",colnames(ce.rnaCounts))]
+head(rnacounts_opcC)
+head(ce.rnaCounts)
+dim(rnacounts_opcC)
+dim(ce.rnaCounts)
+
+
+dnacounts_opcC <- ce.dnaCounts[,!grepl("_3_",colnames(ce.dnaCounts))]
+head(dnacounts_opcC)
+head(ce.dnaCounts)
+dim(dnacounts_opcC)
+dim(ce.dnaCounts)
+
+#ctrl
+#filter to the selcted CRS
+rownames(rnacounts_opcC) <- gsub('.*ENH_OPC_','',rownames(rnacounts_opcC))
+
+#extract controls
+rnacounts_opcC_ctrl <- rnacounts_opcC[grepl("CTRL_",rownames(rnacounts_opcC)),]
+
+
+#Ifn
+#edit rownames
+rownames(dnacounts_opcC) <- gsub('.*ENH_OPC_','',rownames(dnacounts_opcC))
+# extract the controls
+dnacounts_opcC_ctrl <- dnacounts_opcC[grepl("CTRL_",rownames(dnacounts_opcC)),]
+
+
+
+
+
+
+
+dim(dnacounts_opcC_ctrl)
+dim(rnacounts_opcC_ctrl)
+
+```
+#MPRA2 IFN (2 reps)
+
+opc IFN mpra2 
+```{r}
+ce.rnaCounts <- read.csv("OPC_IFN/rna_counts.tsv" , header = TRUE, 
+                  sep = "\t", row.names = 1 , 
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  stringsAsFactors = FALSE , fill = T)
+
+ce.dnaCounts <- read.csv("OPC_IFN/dna_counts.tsv" , header = TRUE, 
+                  sep = "\t", row.names = 1 , 
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  stringsAsFactors = FALSE , fill = T)
+
+#retrieve only rep1 and rep2
+rnacounts_opcI <- ce.rnaCounts[,!grepl("_3_",colnames(ce.rnaCounts))]
+head(rnacounts_opcI)
+head(ce.rnaCounts)
+dim(rnacounts_opcI)
+dim(ce.rnaCounts)
+
+
+dnacounts_opcI <- ce.dnaCounts[,!grepl("_3_",colnames(ce.dnaCounts))]
+head(dnacounts_opcI)
+head(ce.dnaCounts)
+dim(dnacounts_opcI)
+dim(ce.dnaCounts)
+
+#filter to the selcted CRS
+rownames(rnacounts_opcI) <- gsub('.*ENH_OPC_','',rownames(rnacounts_opcI))
+rnacounts_opcI_ctrl <- rnacounts_opcI[grepl("CTRL_",rownames(rnacounts_opcI)),]
+
+
+rownames(dnacounts_opcI) <- gsub('.*ENH_OPC_','',rownames(dnacounts_opcI))
+dnacounts_opcI_ctrl <- dnacounts_opcI[grepl("CTRL_",rownames(dnacounts_opcI)),]
+
+dim(dnacounts_opcI_ctrl)
+
+#
+
+#extract the controls
+
+```
+metadata files
+```{r}
+
+ce.rnaAnnot <- read.table("OPC_Ctrl/rna_annot.tsv" , header = TRUE, 
+                  sep = "\t", row.names = 1 ,
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  fill = T)
+
+ce.dnaAnnot <- read.table("OPC_Ctrl/dna_annot.tsv" , header = TRUE, 
+                  sep = "\t" , row.names = 1  , 
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  fill = T)
+
+
+dnaanot_opcC <- ce.dnaAnnot[!grepl("_3_",rownames(ce.dnaAnnot)),]
+rnaanot_opcC <- ce.rnaAnnot[!grepl("_3_",rownames(ce.rnaAnnot)),]
+
+ce.rnaAnnot <- read.table("OPC_IFN/rna_annot.tsv" , header = TRUE, 
+                  sep = "\t", row.names = 1 ,
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  fill = T)
+
+ce.dnaAnnot <- read.table("OPC_IFN/dna_annot.tsv" , header = TRUE, 
+                  sep = "\t" , row.names = 1  , 
+              #    na.strings = c("", "NA"),  # Specify empty strings as NA
+                  fill = T)
+
+
+
+dnaanot_opcI <- ce.dnaAnnot[!grepl("_3_",rownames(ce.dnaAnnot)),]
+rnaanot_opcI <- ce.rnaAnnot[!grepl("_3_",rownames(ce.rnaAnnot)),]
+
+
+
+```
+
+
+
+#note I tried to run CTRL and IFN as there were replicates. i dont think is correct
+
+#build combined table
+# CHECK DIMENSIONS TO SEE IF SELECTED OR ALL THE CRS
+```{r}
+head(rnacounts_opcC_ctrl)
+head(rnacounts_opcI_ctrl)
+
+selected.dnaCounts <- cbind(dnacounts_opcC , dnacounts_opcI )
+selected.rnaCounts <- cbind(rnacounts_opcC , rnacounts_opcI )
+
+rnacounts_CTRL <- cbind( rnacounts_opcC_ctrl , rnacounts_opcI_ctrl)
+dnacounts_CTRL <- cbind( dnacounts_opcC_ctrl , dnacounts_opcI_ctrl)
+
+
+#build final table check dimensions just in case
+final_rnaCounts <- rbind( selected.rnaCounts , rnacounts_CTRL )
+final_dnaCounts <- rbind( selected.dnaCounts , dnacounts_CTRL )
+
+
+dim(final_dnaCounts)
+dim(final_rnaCounts)
+```
+
+
+```{r}
+
+#counts matrix MPRA2 with 2 replicates
+
+saveRDS(final_rnaCounts ,  file ="hOPC_CtrlIFN_MPRA2_rnacounts_raw_CRS.rds")
+saveRDS(final_dnaCounts ,  file ="hOPC_CtrlIFN_MPRA2_dnacounts_raw_CRS.rds")
+
+
+```
+
+
+#where are the controls
+```{r}
+#
+grep(
+  "CTRL_", 
+  rownames(final_dnaCounts), 
+  value = FALSE
+)
+
+dim(final_dnaCounts)
+dim(final_rnaCounts)
+ce.control <- rep(FALSE, 49)
+
+# Set positions 100 and 125 to TRUE
+ce.control[c(43, 44, 45, 46, 47 , 48, 49  )] <- TRUE
+ce.control <- rep(FALSE, 1333)
+ce.control[c(423,  576 , 642,  903,  938, 1023 ,1085, 1327, 1328, 1329, 1330 ,1331 ,1332 ,1333 )] <- TRUE
+```
+##checks
+
+
+```{r}
+#view(all.rnaCounts)
+dim(final_rnaCounts)
+final_rnaCounts[is.na(final_rnaCounts)] <- 0 
+length(rowSums(final_rnaCounts) > 10000) # just to test
+df = final_dnaCounts[apply(final_dnaCounts[1:ncol(final_dnaCounts),], 1, max) > 0,] 
+#df  <- all.rnaCounts[rowSums(all.rnaCounts) > 0, ]
+#check if size if the same
+#dim(df)
+dim(final_dnaCounts)
+#in this case yes
+final_dnaCounts[is.na(final_dnaCounts)] <- 0 
+final_rnaCounts[is.na(final_rnaCounts)] <- 0 
+
+rna_test <- as.data.frame(rowSums(final_rnaCounts) )
+dna_test <- as.data.frame(rowSums(final_dnaCounts)) 
+             
+dim(rna_test)
+test_counts <- cbind( rna_test , dna_test)
+#this is the scatter of CRS counts in rna and dna , for each barcode there has to be some dna count to be counted in the rna
+plot((test_counts$`rowSums(final_rnaCounts)`[ test_counts$`rowSums(final_dnaCounts)` > 0 ]) , (test_counts$`rowSums(final_dnaCounts)`[ test_counts$`rowSums(final_dnaCounts)` > 0 ]) , xlim=c(0,60000) , ylim=c(0,60000))
+
+#there should not be rna counts without dna counts
+plot((test_counts$`rowSums(final_rnaCounts)`[ test_counts$`rowSums(final_dnaCounts)` == 0 ]) , (test_counts$`rowSums(final_dnaCounts)`[ test_counts$`rowSums(final_dnaCounts)` == 0 ]) , xlim=c(0,60000) , ylim=c(0,60000))
+
+
+summary(test_counts)
+```
+
+create the annotations
+```{r}
+rnaanot_opcI$replicate <- as.factor(rnaanot_opcI$replicate)
+rnaanot_opcI$condition <- as.factor(rnaanot_opcI$condition)
+rnaanot_opcI$type <- as.factor(rnaanot_opcI$type)
+
+dnaanot_opcI$replicate <- as.factor(dnaanot_opcI$replicate)
+dnaanot_opcI$condition <- as.factor(dnaanot_opcI$condition)
+dnaanot_opcI$type <- as.factor(dnaanot_opcI$type)
+
+
+rnaanot_opcC$replicate <- as.factor(rnaanot_opcC$replicate)
+rnaanot_opcC$condition <- as.factor(rnaanot_opcC$condition)
+rnaanot_opcC$type <- as.factor(rnaanot_opcC$type)
+
+
+dnaanot_opcC$replicate <- as.factor(dnaanot_opcC$replicate)
+dnaanot_opcC$condition <- as.factor(dnaanot_opcC$condition)
+dnaanot_opcC$type <- as.factor(dnaanot_opcC$type)
+
+
+selected.dnaAnnot <- rbind(dnaanot_opcC , dnaanot_opcI )
+
+selected.rnaAnnot <- rbind(rnaanot_opcC , rnaanot_opcI)
+
+
+unique(selected.dnaAnnot$batch)
+unique(selected.dnaAnnot$condition)
+head(selected.dnaAnnot)
+
+```
+```{r}
+saveRDS(selected.rnaAnnot ,  file ="OPC_CtrlIFN_MPRA2_RNAannot.rds")
+saveRDS(selected.dnaAnnot ,  file ="OPC_CtrlIFN_MPRA2_DNAannot.rds")
+saveRDS(ce.control ,  file ="OPC_CtrlIFN_MPRA2_controls.rds")
+```
+differential activity MPRA2 hOPCs IFN vs Ctrl
+```{r}
+
+final_dnaCounts[is.na(final_dnaCounts)] <- 0 
+final_rnaCounts[is.na(final_rnaCounts)] <- 0 
+
+obj_selected_mpra2 <- MpraObject(dnaCounts = as.matrix(final_dnaCounts), rnaCounts = as.matrix(final_rnaCounts), 
+                  dnaAnnot = selected.dnaAnnot , rnaAnnot = selected.dnaAnnot , controls = ce.control )
+                
+
+obj_selected_mpra2 <- estimateDepthFactors(obj_selected_mpra2, lib.factor = c( "replicate" ,   "condition"),
+                            which.lib = "both" , depth.estimator = "uq")
+
+
+obj_selected_mpra2 <- analyzeQuantification(obj = obj_selected_mpra2, 
+                              dnaDesign = ~  condition,
+                              rnaDesign = ~  condition)
+
+alpha_selected_mpra2 <- getAlpha(obj_selected_mpra2, by.factor = "condition")
+
+##visualize the estimates
+boxplot(alpha_selected_mpra2)
+
+
+```
+
+```{r}
+res.ctrl_mpra2 <- testEmpirical(obj = obj_selected_mpra2, 
+                               statistic = alpha_selected_mpra2$OPC_Ctrl)
+summary(res.ctrl_mpra2)
+
+res.ctrl_mpra2
+
+res.ifn_mpra2 <- testEmpirical(obj = obj_selected_mpra2, 
+                               statistic = alpha_selected_mpra2$OPC_IFN)
+summary(res.ifn_mpra2)
+
+res.ifn_mpra2
+
+par(mfrow=c(2,2))
+
+hist(res.ctrl_mpra2$pval.mad, main="ctrl, all")
+hist(res.ctrl_mpra2$pval.mad[ce.control], main="ctrl, controls")
+hist(res.ifn_mpra2$pval.mad, main="ifn, all")
+hist(res.ifn_mpra2$pval.mad[ce.control], main="ifn, controls")
+
+rownames(res.ctrl_mpra2) <- rownames(final_dnaCounts)
+
+rownames(res.ifn_mpra2) <- rownames(final_dnaCounts)
+
+```
+```{r}
+obj_selected_mpra2 <- analyzeComparative(obj = obj_selected_mpra2, 
+                           dnaDesign = ~  condition, 
+                           rnaDesign = ~   condition, 
+                           reducedDesign = ~ 1)
+
+res_selected_mpra2 <- testLrt(obj_selected_mpra2)
+
+head(res_selected_mpra2)
+plot(res_selected_mpra2$logFC, -log10(res_selected_mpra2$pval))
+```
