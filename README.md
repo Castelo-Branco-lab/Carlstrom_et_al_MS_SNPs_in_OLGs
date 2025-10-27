@@ -9,5 +9,5 @@ Raw data can be accessed on ENA (xxxxxx) for MPRA raw fastq files and EGA (xxxxx
 
 Processed data files can be accessed 10.5281/zenodo.17415989
 
-link to bioRxiv prepint (xxxx)
+link to bioRxiv preprint (xxxx)
 
