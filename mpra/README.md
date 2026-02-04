@@ -27,7 +27,8 @@ nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_op
 
  From the count_hOPC_Bcells_mapq1/ output use the raw count tables for each celltype condition. These can be loaded in R for downstream analyses.
 
- 5. Then, we selected CRES of interest and retrieved the associated UMIs and the RNA and DNA counts. 
+ 5. Then, we selected CRES of interest and retrieved the associated UMIs and the RNA and DNA counts.
+[Selected CRES counts jupyter nb](Scripts/MPRA1_BC_per_CRS_EA.ipynb)
 ```
 #MPRA1_BC_per_CRS_EA.ipynb
 ##CRE 1106 example
