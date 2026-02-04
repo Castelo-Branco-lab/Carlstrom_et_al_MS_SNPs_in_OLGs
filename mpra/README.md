@@ -1,7 +1,7 @@
 ## MS associated SNVs MPRA analysis in hOPCs and Bcells (Control and IFNG treated)
 
 
- ### Run CRE association in MPRA1 and MPRA2
+ ### CRE association 
 
 1. Install MPRAflow nextflow version (https://mpraflow.readthedocs.io/en/latest/install.html) 
 
@@ -16,12 +16,16 @@ nextflow run association.nf -resume  -w MPRA_assoc/work --fastq-insert "fastq/pl
 ```
 3. Use the association file as input for getting the RNA and DNA counts for each celltype and condition
 ```
+conda activate MPRAflow
+export  NXF_VER=22.10.0 
 
+#dir: where the input fastqs are fastq_hOPC_Bcells_RNADNA_folder/
+#output file from the association: *filtered_coords_to_barcodes.pickle
+nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_opc_seqRound1_311024_P32263.csv" --dir "fastq_hOPC_Bcells_RNADNA_folder" --outdir "MPRA_count" --design "Candidate_CRE_regions.fa" --labels CRE_candidate_labels.tsv  --name count_hOPC_Bcells_mapq1  --association "assoc_plasmid1_mapq1_filtered_coords_to_barcodes.pickle"  --umi-length 16
 ```
- run RNA DNA counts per associated CRS in MPRA1 and MPRA2
+ 4. Build count tables for data analysis and statistical methods (differential activity and alellic comparisons)
 
- Build count tables for data analysis and statistical methods (differential activity and alellic comparisons)
-
+From the count_hOPC_Bcells_mapq1/ output use the raw count tables for each celltype condition. These can be loaded in R for downstream analyses.
 
 Processed data files in 10.5281/zenodo.17415989
 
