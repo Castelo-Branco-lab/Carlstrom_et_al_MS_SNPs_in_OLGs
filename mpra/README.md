@@ -1,11 +1,9 @@
 ## MS associated SNVs MPRA analysis in hOPCs and Bcells (Control and IFNG treated)
 
 
- ### CRE association 
-
 1. Install MPRAflow nextflow version (https://mpraflow.readthedocs.io/en/latest/install.html) 
 
-2. Prepare CRE fasta and labels files as explained in https://mpraflow.readthedocs.io/en/latest/association.html
+2. Association. Prepare CRE fasta and labels files as explained in https://mpraflow.readthedocs.io/en/latest/association.html
 ```
 #MPRA2_CRS_BC_assoc.sh
 conda activate MPRAflow
