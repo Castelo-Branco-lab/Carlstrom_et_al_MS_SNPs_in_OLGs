@@ -29,7 +29,7 @@ nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_op
 [Selected CRES counts jupyter nb](Scripts/MPRA1_BC_per_CRS_EA.ipynb)
 ```
 # example counts for CRE 1106
-[eneritz@monod ~ ]$ head CRS_MPRA11_1106_OPC_IFN_RNADNA_BC_counts.csv
+$ head CRS_MPRA11_1106_OPC_IFN_RNADNA_BC_counts.csv
 AAAAAAACTTATAGA,0,7
 AAAAAAGATGAAATA,229,26
 AAAAAGAAGAAACCA,0,6
