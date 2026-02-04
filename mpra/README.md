@@ -12,7 +12,7 @@ conda activate MPRAflow
 export  NXF_VER=22.10.0 
 #nextflow run association.nf --help
 
-nextflow run association.nf -resume  -w MPRA_assoc/work --fastq-insert "fastq/plasmid_R1.fastq.gz"  --fastq-insertPE "fastq/plasmid_R3.fastq.gz"  --fastq-bc "fastq/plasmid_R2.fastq.gz" --design "Candidate_CRE_regions.fa" --labels Candidate_CRE_labels.tsv --name assoc_plasmid1_mapq1 --mapq 1 --outdir output
+nextflow run association.nf  -w MPRA_assoc/work --fastq-insert "fastq/plasmid_R1.fastq.gz"  --fastq-insertPE "fastq/plasmid_R3.fastq.gz"  --fastq-bc "fastq/plasmid_R2.fastq.gz" --design "Candidate_CRE_regions.fa" --labels Candidate_CRE_labels.tsv --name assoc_plasmid1_mapq1 --mapq 1 --outdir output
 ```
 3. Use the association file as input for getting the RNA and DNA counts for each celltype and condition
 ```
@@ -27,18 +27,17 @@ nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_op
 
  From the count_hOPC_Bcells_mapq1/ output use the raw count tables for each celltype condition. These can be loaded in R for downstream analyses.
 
- 5. Then, we selected CRES of interest and retrieved the associated UMIs and the RNA and DNA counts.
+ 5. Then, we selected CRES of interest and retrieved the associated barcodes and their RNA and DNA counts.
 [Selected CRES counts jupyter nb](Scripts/MPRA1_BC_per_CRS_EA.ipynb)
 ```
-#MPRA1_BC_per_CRS_EA.ipynb
-##CRE 1106 example
+# example counts for CRE 1106
+[eneritz@monod ~ ]$ head CRS_MPRA11_1106_OPC_IFN_RNADNA_BC_counts.csv
 AAAAAAACTTATAGA,0,7
 AAAAAAGATGAAATA,229,26
 AAAAAGAAGAAACCA,0,6
 AAAACCAAGAAGAGA,0,15
 AAAACCAGAAGGGGG,3,0
 AAAAGAAATAAGCGA,188,61
-...
 ```
 
 
