@@ -25,7 +25,21 @@ nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_op
 ```
  4. Build count tables for data analysis and statistical methods (differential activity and alellic comparisons)
 
-From the count_hOPC_Bcells_mapq1/ output use the raw count tables for each celltype condition. These can be loaded in R for downstream analyses.
+ From the count_hOPC_Bcells_mapq1/ output use the raw count tables for each celltype condition. These can be loaded in R for downstream analyses.
+
+ 5. Then, we selected CRES of interest and retrieved the associated UMIs and the RNA and DNA counts. 
+```
+#MPRA1_BC_per_CRS_EA.ipynb
+##CRE 1106 example
+AAAAAAACTTATAGA,0,7
+AAAAAAGATGAAATA,229,26
+AAAAAGAAGAAACCA,0,6
+AAAACCAAGAAGAGA,0,15
+AAAACCAGAAGGGGG,3,0
+AAAAGAAATAAGCGA,188,61
+...
+```
+
 
 Processed data files in 10.5281/zenodo.17415989
 
