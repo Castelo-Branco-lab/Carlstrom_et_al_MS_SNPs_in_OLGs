@@ -41,5 +41,5 @@ AAAAGAAATAAGCGA,188,61
 
 Processed data files in 10.5281/zenodo.17415989
 
-Raw fastq files in ENA (XXXX)
+Raw fastq files in GEO (GSE310577) 
 
