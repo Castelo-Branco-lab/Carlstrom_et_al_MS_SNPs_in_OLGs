@@ -12,14 +12,15 @@ export  NXF_VER=22.10.0
 
 nextflow run association.nf  -w MPRA_assoc/work --fastq-insert "fastq/plasmid_R1.fastq.gz"  --fastq-insertPE "fastq/plasmid_R3.fastq.gz"  --fastq-bc "fastq/plasmid_R2.fastq.gz" --design "Candidate_CRE_regions.fa" --labels Candidate_CRE_labels.tsv --name assoc_plasmid1_mapq1 --mapq 1 --outdir output
 ```
-3. Use the association file as input for getting the RNA and DNA counts for each celltype and condition
+3. Use the association file as input for getting the RNA and DNA counts for each celltype and condition.
+   NOTE: if using --mpranalyze parameter in count.nf use the latest fixed script for mpranalyze_compiler.py from https://github.com/shendurelab/MPRAflow . For details see explanation here https://github.com/shendurelab/MPRAflow/pull/87 
 ```
 conda activate MPRAflow
 export  NXF_VER=22.10.0 
 
 #dir: where the input fastqs are fastq_hOPC_Bcells_RNADNA_folder/
 #output file from the association: *filtered_coords_to_barcodes.pickle
-nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_opc_seqRound1_311024_P32263.csv" --dir "fastq_hOPC_Bcells_RNADNA_folder" --outdir "MPRA_count" --design "Candidate_CRE_regions.fa" --labels CRE_candidate_labels.tsv  --name count_hOPC_Bcells_mapq1  --association "assoc_plasmid1_mapq1_filtered_coords_to_barcodes.pickle"  --umi-length 16
+nextflow run count.nf   -w MPRA_count/work --experiment-file "experiment_file_opc_seqRound1_311024_P32263.csv" --dir "fastq_hOPC_Bcells_RNADNA_folder" --outdir "MPRA_count" --design "Candidate_CRE_regions.fa" --labels CRE_candidate_labels.tsv  --name count_hOPC_Bcells_mapq1  --association "assoc_plasmid1_mapq1_filtered_coords_to_barcodes.pickle"  --umi-length 16  ## --mpranalyze ## if RNA and DNA .tsv files are needed for downstream analyses
 ```
  4. Build count tables for data analysis and statistical methods (differential activity and alellic comparisons)
 
@@ -39,7 +40,8 @@ AAAAGAAATAAGCGA,188,61
 ```
 
 
-Processed data files in 10.5281/zenodo.17415989
+MPRA Processed data files can be downloaded in https://zenodo.org/records/21474573 (please download the latest version) July 2026 version2
 
-Raw fastq files in GEO (GSE310577) 
+Raw fastq files in GEO (GSE310577) # will be public once the study is published
+ 
 
